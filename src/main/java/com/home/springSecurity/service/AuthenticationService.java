@@ -8,7 +8,6 @@ import com.home.springSecurity.entity.Users;
 import com.home.springSecurity.jwt.JwtService;
 import com.home.springSecurity.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
