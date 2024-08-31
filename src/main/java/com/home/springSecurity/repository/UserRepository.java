@@ -1,12 +1,12 @@
 package com.home.springSecurity.repository;
 
-import com.home.springSecurity.entity.Users;
+import com.home.springSecurity.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<Users,Long> {
-    Optional<Users> findByEmail(String userName);
+public interface UserRepository extends JpaRepository<User,Long> {
+    Optional<User> findByEmail(String userName);
 }

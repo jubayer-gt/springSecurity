@@ -1,14 +1,16 @@
 package com.home.springSecurity.jwt;
 
+import com.home.springSecurity.repository.TokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,25 +18,52 @@ import java.util.function.Function;
 
 @Component
 public class JwtService {
-    private static final String SECRET_KEY = "26452948404D635166546A576E5A7234753778214125442A462D4A614E645267";
+    @Value("${application.security.jwt.secret-key}")
+    private String secretKey;
+    @Value("${application.security.jwt.access-token-expiration}")
+    private long accessTokenExpire;
+    @Value("${application.security.jwt.refresh-token-expiration}")
+    private long refreshTokenExpire;
 
-    public String generateToken(UserDetails userDetails){
-        return generateToken(new HashMap<>(),userDetails);
+    @Autowired
+    private  TokenRepository tokenRepository;
+    public String generateAccessToken(UserDetails userDetails){
+        return generateAccessToken(new HashMap<>(),userDetails);
     }
-    public String generateToken(
+    public String generateAccessToken(
             Map<String, Object> extraClaims, UserDetails userDetails
     ){
+        return buildToken(extraClaims,userDetails,accessTokenExpire);
+    }
+
+    public String generateRefreshToken( UserDetails userDetails
+    ){
+        return buildToken(new HashMap<>(),userDetails,refreshTokenExpire);
+    }
+    private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration){
         return Jwts
                 .builder().claims(extraClaims)
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis()+1000*60*60))
+                .expiration(new Date(System.currentTimeMillis()+expiration ))
                 .signWith(getSignInKey())
                 .compact();
     }
 
     public Boolean isTokenValid(String token){
-        return  !isTokenExpired(token);
+        boolean validToken = tokenRepository
+                .findByAccessToken(token)
+                .map(t -> !t.isLoggedOut())
+                .orElse(false);
+        return  !isTokenExpired(token) && validToken;
+    }
+
+    public Boolean isValidRefreshToken(String token){
+        boolean validToken = tokenRepository
+                .findByRefreshToken(token)
+                .map(t -> !t.isLoggedOut())
+                .orElse(false);
+        return  !isTokenExpired(token) && validToken;
     }
 
     private boolean isTokenExpired(String token) {
@@ -62,7 +91,7 @@ public class JwtService {
     }
 
     private SecretKey getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }

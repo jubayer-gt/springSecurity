@@ -4,6 +4,8 @@ import com.home.springSecurity.dto.AuthenticationRequest;
 import com.home.springSecurity.dto.AuthenticationResponse;
 import com.home.springSecurity.dto.RegisterRequest;
 import com.home.springSecurity.service.AuthenticationService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -25,5 +27,12 @@ public class AuthenticationController {
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> Login(@RequestBody AuthenticationRequest request){
         return ResponseEntity.ok(authenticationService.login(request));
+    }
+    @PostMapping("/refresh_token")
+    public ResponseEntity refreshToken(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        return authenticationService.refreshToken(request, response);
     }
 }
