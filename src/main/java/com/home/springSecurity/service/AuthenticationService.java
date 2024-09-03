@@ -12,6 +12,7 @@ import com.home.springSecurity.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthenticationService {
     private final UserRepository userRepository;
 
@@ -45,6 +47,11 @@ public class AuthenticationService {
         var refreshToken=jwtService.generateRefreshToken(user);
         revokeAllTokenByUser(user);
         savedUserToken(accessToken, refreshToken, savedUser);
+        log.info("Info about Nothing");
+        log.warn("Warn about Nothing");
+        log.error("Error occurred for {} :",request.getFirstName());
+        log.debug("Debug about Nothing");
+        log.trace("Trace about Nothing");
         return AuthenticationResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
